@@ -115,13 +115,20 @@ body {
     padding-bottom: 10px;
 }
 
-.shirt img,
+.shirt,
 .currentcard {
     width: 220px;
     height: 320px;
 }
 
-.currentcardclass {
+.close {
+    display: none;
+    width: 220px;
+    height: 320px;
+}
+
+.currentcardclass,
+.imgshirt {
     width: 220px;
     height: 320px;
 }

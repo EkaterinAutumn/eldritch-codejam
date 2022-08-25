@@ -321,6 +321,8 @@ const packcards = document.querySelector('.packcards');
 const layout = document.querySelector('.layout');
 const shirt = document.querySelector('.shirt');
 const currentcard = document.querySelector('.currentcard');
+const imgShirt = document.querySelector('.imgshirt');
+const countHtmlElement = document.getElementById('count');
 let selectedCard;
 let selectedLevel;
 let currentAncient;
@@ -356,13 +358,16 @@ function setLevel(event) {
         selectedLevel = target;
         selectedLevel.classList.add('active');
         hideLayout();
-        fillDeckForAllStages();
+        if (target.id === 'normal') {
+            fillDeckForAllStages();
+        }
     }
 }
 
 function showLayout() {
     layout.classList.add('layout-active');
-    mixCurrentDeckByStage(currentStage)
+    mixCurrentDeckByStage(currentStage);
+    setCountByPattern(currentAncient);
 }
 function hideLayout() {
     layout.classList.remove('layout-active')
@@ -514,7 +519,6 @@ function mixCurrentDeckByStage(stage) {
         return [...acc, ...Object.values(color)]
     }, []);
     currentStageDeck = mixCards(stageCards);
-    console.log(currentStageDeck)
 }
 
 function takeCard() {
@@ -522,8 +526,60 @@ function takeCard() {
         currentcard.firstChild.remove()
     }
     let card = currentStageDeck.pop();
+    removeCardFromMythicDeck(card);
     let image = document.createElement('img');
     image.src = card.cardFace;
     image.classList.add('currentcardclass');
     currentcard.appendChild(image);
+    if (!currentStageDeck.length) {
+        nextStage();
+        if (currentStage != 'final') { mixCurrentDeckByStage(currentStage) };
+    }
+    if (currentStage === 'final' && currentStageDeck.length === 0) {
+        imgShirt.classList.add('close');
+        shirt.onclick = '';
+    }
+}
+
+function nextStage() {
+    if (currentStage === 'stage1') {
+        currentStage = 'stage2';
+        return;
+    }
+    if (currentStage === 'stage2') {
+        currentStage = 'stage3';
+        return;
+    }
+    if (currentStage === 'stage3') {
+        currentStage = 'final';
+    }
+
+}
+
+function setCountByPattern(ancient) {
+    const stagesValues = deckPattern[ancient];
+    Object.keys(stagesValues).forEach((stageName) => {
+        const stageHtmlElement = countHtmlElement.querySelector(`.${stageName}`);
+        const colors = stagesValues[stageName];
+
+        Object.keys(colors).forEach((colorName) => {
+            const colorHtmlElement = stageHtmlElement.querySelector(`.${colorName}`);
+            const colorValue = colors[colorName];
+            colorHtmlElement.textContent = colorValue;
+        })
+
+    })
+}
+
+function removeCardFromMythicDeck(card) {
+    let colorDeck = mythicDeck[currentStage][card.color];
+    let filteredCards = colorDeck.filter((sourseCard) => sourseCard.id !== card.id);
+    mythicDeck[currentStage][card.color] = filteredCards;
+    updateCount(card);
+}
+
+function updateCount(card) {
+    const stageHtmlElement = countHtmlElement.querySelector(`.${currentStage}`);
+    const colorHtmlElement = stageHtmlElement.querySelector(`.${card.color}`);
+    colorHtmlElement.textContent = colorHtmlElement.textContent - 1;
 }
